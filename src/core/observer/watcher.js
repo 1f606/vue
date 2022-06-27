@@ -19,6 +19,7 @@ import type { SimpleSet } from '../util/index'
 
 let uid = 0
 
+// Vue中有三种watcher，渲染watcher，侦听器watcher，计算属性watcher
 /**
  * A watcher parses an expression, collects dependencies,
  * and fires callback when the expression value changes.
@@ -45,9 +46,11 @@ export default class Watcher {
 
   constructor (
     vm: Component,
+    // lifecycle.js中的updateComponent
     expOrFn: string | Function,
     cb: Function,
     options?: ?Object,
+    // 是否是渲染watcher
     isRenderWatcher?: boolean
   ) {
     this.vm = vm
@@ -80,6 +83,7 @@ export default class Watcher {
     if (typeof expOrFn === 'function') {
       this.getter = expOrFn
     } else {
+      // 例如Person.name的形式
       this.getter = parsePath(expOrFn)
       if (!this.getter) {
         this.getter = noop
@@ -100,6 +104,9 @@ export default class Watcher {
    * Evaluate the getter, and re-collect dependencies.
    */
   get () {
+    // 把当前的watcher对象存入栈中
+    // 每个组件都会对应一个watcher，watcher会渲染视图，如果组件有嵌套的话，会先渲染内部组件
+    // 所以需要把父组件对应的watcher保存起来
     pushTarget(this)
     let value
     const vm = this.vm

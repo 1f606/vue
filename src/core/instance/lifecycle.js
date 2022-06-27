@@ -32,6 +32,7 @@ export function setActiveInstance(vm: Component) {
 export function initLifecycle (vm: Component) {
   const options = vm.$options
 
+  // TODO parent?
   // locate first non-abstract parent
   let parent = options.parent
   if (parent && !options.abstract) {

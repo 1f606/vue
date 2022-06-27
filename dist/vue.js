@@ -1,6 +1,6 @@
 /*!
  * Vue.js v2.6.14
- * (c) 2014-2021 Evan You
+ * (c) 2014-2022 Evan You
  * Released under the MIT License.
  */
 (function (global, factory) {
@@ -46,7 +46,7 @@
 
   /**
    * Quick object check - this is primarily used to tell
-   * Objects from primitive values when we know the value
+   * objects from primitive values when we know the value
    * is a JSON-compliant type.
    */
   function isObject (obj) {
@@ -1552,15 +1552,19 @@
 
     var options = {};
     var key;
+    // 把parent（构造函数）上的全局配置拷贝到options中
     for (key in parent) {
       mergeField(key);
     }
+    // 把options中没有的拷贝到parent上
     for (key in child) {
       if (!hasOwn(parent, key)) {
         mergeField(key);
       }
     }
     function mergeField (key) {
+      // strats是各种预设属性的拷贝方法的工具对象
+      // TODO data的拷贝，返回了一个函数，目前没看懂
       var strat = strats[key] || defaultStrat;
       options[key] = strat(parent[key], child[key], vm, key);
     }
@@ -5084,6 +5088,7 @@
     return modified
   }
 
+  // 不用类的原因是方便挂载方法到原型上
   function Vue (options) {
     if (!(this instanceof Vue)
     ) {
@@ -5452,6 +5457,7 @@
       return obj
     };
 
+    // Vue.options增加components/directives/filters属性，存储全局组件/指令/过滤器
     Vue.options = Object.create(null);
     ASSET_TYPES.forEach(function (type) {
       Vue.options[type + 's'] = Object.create(null);
@@ -5469,6 +5475,7 @@
     initAssetRegisters(Vue);
   }
 
+  // 设置了vue的静态方法
   initGlobalAPI(Vue);
 
   Object.defineProperty(Vue.prototype, '$isServer', {
@@ -7620,7 +7627,9 @@
     }
     var on = vnode.data.on || {};
     var oldOn = oldVnode.data.on || {};
-    target$1 = vnode.elm;
+    // vnode is empty when removing all listeners,
+    // and use old vnode dom element
+    target$1 = vnode.elm || oldVnode.elm;
     normalizeEvents(on);
     updateListeners(on, oldOn, add$1, remove$2, createOnceHandler$1, vnode.context);
     target$1 = undefined;
@@ -7628,7 +7637,8 @@
 
   var events = {
     create: updateDOMListeners,
-    update: updateDOMListeners
+    update: updateDOMListeners,
+    destroy: function (vnode) { return updateDOMListeners(vnode, emptyNode); }
   };
 
   /*  */
@@ -9180,7 +9190,7 @@
       }
     }
     if (staticClass) {
-      el.staticClass = JSON.stringify(staticClass);
+      el.staticClass = JSON.stringify(staticClass.replace(/\s+/g, ' ').trim());
     }
     var classBinding = getBindingAttr(el, 'class', false /* getStatic */);
     if (classBinding) {
@@ -11924,6 +11934,7 @@
   });
 
   var mount = Vue.prototype.$mount;
+  // 重写了$mount方法
   Vue.prototype.$mount = function (
     el,
     hydrating
@@ -12012,3 +12023,4 @@
   return Vue;
 
 }));
+//# sourceMappingURL=vue.js.map

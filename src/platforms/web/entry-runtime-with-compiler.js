@@ -1,5 +1,5 @@
 /* @flow */
-
+// web平台入口
 import config from 'core/config'
 import { warn, cached } from 'core/util/index'
 import { mark, measure } from 'core/util/perf'
@@ -15,10 +15,12 @@ const idToTemplate = cached(id => {
 })
 
 const mount = Vue.prototype.$mount
+// 重写了$mount方法
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
 ): Component {
+  // 拿到el对应的Element
   el = el && query(el)
 
   /* istanbul ignore if */
@@ -62,6 +64,7 @@ Vue.prototype.$mount = function (
         mark('compile')
       }
 
+      // 把template转换成render函数
       const { render, staticRenderFns } = compileToFunctions(template, {
         outputSourceRange: process.env.NODE_ENV !== 'production',
         shouldDecodeNewlines,

@@ -16,7 +16,9 @@ import {
 } from 'web/util/index'
 
 import { patch } from './patch'
+// 注册了平台相关的指令v-model和v-show
 import platformDirectives from './directives/index'
+// 注册了平台相关的组件v-transition和v-transition-group
 import platformComponents from './components/index'
 
 // install platform specific utils

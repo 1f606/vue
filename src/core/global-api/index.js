@@ -51,6 +51,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
     return obj
   }
 
+  // Vue.options增加components/directives/filters属性，存储全局组件/指令/过滤器
   Vue.options = Object.create(null)
   ASSET_TYPES.forEach(type => {
     Vue.options[type + 's'] = Object.create(null)

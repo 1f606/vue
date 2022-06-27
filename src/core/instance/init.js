@@ -35,6 +35,7 @@ export function initMixin (Vue: Class<Component>) {
       // internal component options needs special treatment.
       initInternalComponent(vm, options)
     } else {
+      // 实例初始化配置对象，包含构造函数上的options（全局配置？），用户传入的options
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),
         options || {},
@@ -91,6 +92,8 @@ export function initInternalComponent (vm: Component, options: InternalComponent
 }
 
 export function resolveConstructorOptions (Ctor: Class<Component>) {
+  // 构造函数上的options，全局配置？
+  // TODO
   let options = Ctor.options
   if (Ctor.super) {
     const superOptions = resolveConstructorOptions(Ctor.super)

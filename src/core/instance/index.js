@@ -5,6 +5,7 @@ import { eventsMixin } from './events'
 import { lifecycleMixin } from './lifecycle'
 import { warn } from '../util/index'
 
+// 不用类的原因是方便挂载方法到原型上
 function Vue (options) {
   if (process.env.NODE_ENV !== 'production' &&
     !(this instanceof Vue)

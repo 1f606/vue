@@ -419,15 +419,19 @@ export function mergeOptions (
 
   const options = {}
   let key
+  // 把parent（构造函数）上的全局配置拷贝到options中
   for (key in parent) {
     mergeField(key)
   }
+  // 把用户传入的options中存在，同时parent中不存在的赋值到options中
   for (key in child) {
     if (!hasOwn(parent, key)) {
       mergeField(key)
     }
   }
   function mergeField (key) {
+    // strats是各种预设属性的拷贝方法的工具对象
+    // TODO data的拷贝，返回了一个函数，目前没看懂
     const strat = strats[key] || defaultStrat
     options[key] = strat(parent[key], child[key], vm, key)
   }
