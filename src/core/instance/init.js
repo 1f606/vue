@@ -50,12 +50,17 @@ export function initMixin (Vue: Class<Component>) {
     }
     // expose real self
     vm._self = vm
+    // 定义了一些私有属性
     initLifecycle(vm)
+    // vm事件初始化 父组件绑定在当前组件上的事件
     initEvents(vm)
     initRender(vm)
     callHook(vm, 'beforeCreate')
+    // TODO 为什么不是县初始化provide，里面如何拿到inject的值呢？还有数组形式的inject，没看到如何拿到的
     initInjections(vm) // resolve injections before data/props
+    // 初始化props，methods，data，computed和watcher
     initState(vm)
+    // 初始化_provided属性
     initProvide(vm) // resolve provide after data/props
     callHook(vm, 'created')
 

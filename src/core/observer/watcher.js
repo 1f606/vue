@@ -25,7 +25,7 @@ let uid = 0
  * and fires callback when the expression value changes.
  * This is used for both the $watch() api and directives.
  */
-export default class Watcher {
+export default class ·Watcher {
   vm: Component;
   expression: string;
   cb: Function;
@@ -135,6 +135,7 @@ export default class Watcher {
    */
   addDep (dep: Dep) {
     const id = dep.id
+  // 一个属性被多次使用有多个dep，只添加一个
     if (!this.newDepIds.has(id)) {
       this.newDepIds.add(id)
       this.newDeps.push(dep)

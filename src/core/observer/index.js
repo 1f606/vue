@@ -43,15 +43,18 @@ export class Observer {
     this.value = value
     this.dep = new Dep()
     this.vmCount = 0
+    // 挂载observer到target的__ob__上
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
       if (hasProto) {
+        // 替换Array.prototype上的方法
         protoAugment(value, arrayMethods)
       } else {
         copyAugment(value, arrayMethods, arrayKeys)
       }
       this.observeArray(value)
     } else {
+      // 把对象上每个属性转换成getter和setter
       this.walk(value)
     }
   }
@@ -139,6 +142,7 @@ export function defineReactive (
   customSetter?: ?Function,
   shallow?: boolean
 ) {
+  // 用于收集当前属性的依赖
   const dep = new Dep()
 
   const property = Object.getOwnPropertyDescriptor(obj, key)
@@ -159,9 +163,12 @@ export function defineReactive (
     configurable: true,
     get: function reactiveGetter () {
       const value = getter ? getter.call(obj) : val
+      // 如果存在watcher对象，就建立依赖
       if (Dep.target) {
+        // 为当前属性收集依赖
         dep.depend()
         if (childOb) {
+          // 收集当前属性对应的值的依赖
           childOb.dep.depend()
           if (Array.isArray(value)) {
             dependArray(value)
@@ -172,6 +179,7 @@ export function defineReactive (
     },
     set: function reactiveSetter (newVal) {
       const value = getter ? getter.call(obj) : val
+      // 如果新值和旧值相等或为NaN，返回
       /* eslint-disable no-self-compare */
       if (newVal === value || (newVal !== newVal && value !== value)) {
         return
@@ -180,6 +188,7 @@ export function defineReactive (
       if (process.env.NODE_ENV !== 'production' && customSetter) {
         customSetter()
       }
+      // 只有getter没有setter，那么就是只读属性
       // #7981: for accessor properties without setter
       if (getter && !setter) return
       if (setter) {

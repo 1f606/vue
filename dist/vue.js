@@ -752,7 +752,10 @@
   Dep.target = null;
   var targetStack = [];
 
+  // 父子组件嵌套的时候先把父组件对应的watcher入栈，
+  // 再去处理子组件的watcher，子组件的处理完毕后，再把父组件对应的watcher出栈，继续操作
   function pushTarget (target) {
+    debugger;
     targetStack.push(target);
     Dep.target = target;
   }
@@ -923,15 +926,18 @@
     this.value = value;
     this.dep = new Dep();
     this.vmCount = 0;
+    // 挂载observer到target的__ob__上
     def(value, '__ob__', this);
     if (Array.isArray(value)) {
       if (hasProto) {
+        // 替换Array.prototype上的方法
         protoAugment(value, arrayMethods);
       } else {
         copyAugment(value, arrayMethods, arrayKeys);
       }
       this.observeArray(value);
     } else {
+      // 把对象上每个属性转换成getter和setter
       this.walk(value);
     }
   };
@@ -1018,6 +1024,7 @@
     customSetter,
     shallow
   ) {
+    // 用于收集当前属性的依赖
     var dep = new Dep();
 
     var property = Object.getOwnPropertyDescriptor(obj, key);
@@ -1038,9 +1045,11 @@
       configurable: true,
       get: function reactiveGetter () {
         var value = getter ? getter.call(obj) : val;
+        // 如果存在当前依赖目标，即watcher对象，就建立依赖
         if (Dep.target) {
           dep.depend();
           if (childOb) {
+            // 收集当前子对象的依赖
             childOb.dep.depend();
             if (Array.isArray(value)) {
               dependArray(value);
@@ -1051,6 +1060,7 @@
       },
       set: function reactiveSetter (newVal) {
         var value = getter ? getter.call(obj) : val;
+        // 如果新值和旧值相等或为NaN，返回
         /* eslint-disable no-self-compare */
         if (newVal === value || (newVal !== newVal && value !== value)) {
           return
@@ -1059,6 +1069,7 @@
         if (customSetter) {
           customSetter();
         }
+        // 只有getter没有setter，那么就是只读属性
         // #7981: for accessor properties without setter
         if (getter && !setter) { return }
         if (setter) {
@@ -1556,7 +1567,7 @@
     for (key in parent) {
       mergeField(key);
     }
-    // 把options中没有的拷贝到parent上
+    // 把用户传入的options中存在，同时parent中不存在的赋值到options中
     for (key in child) {
       if (!hasOwn(parent, key)) {
         mergeField(key);
@@ -3928,6 +3939,7 @@
   function initLifecycle (vm) {
     var options = vm.$options;
 
+    // TODO parent?
     // locate first non-abstract parent
     var parent = options.parent;
     if (parent && !options.abstract) {
@@ -4431,6 +4443,7 @@
 
   var uid$2 = 0;
 
+  // Vue中有三种watcher，渲染watcher，侦听器watcher，计算属性watcher
   /**
    * A watcher parses an expression, collects dependencies,
    * and fires callback when the expression value changes.
@@ -4438,9 +4451,11 @@
    */
   var Watcher = function Watcher (
     vm,
+    // lifecycle.js中的updateComponent
     expOrFn,
     cb,
     options,
+    // 是否是渲染watcher
     isRenderWatcher
   ) {
     this.vm = vm;
@@ -4471,6 +4486,7 @@
     if (typeof expOrFn === 'function') {
       this.getter = expOrFn;
     } else {
+      // 例如Person.name的形式
       this.getter = parsePath(expOrFn);
       if (!this.getter) {
         this.getter = noop;
@@ -4491,6 +4507,9 @@
    * Evaluate the getter, and re-collect dependencies.
    */
   Watcher.prototype.get = function get () {
+    // 把当前的watcher对象存入栈中
+    // 每个组件都会对应一个watcher，watcher会渲染视图，如果组件有嵌套的话，会先渲染内部组件
+    // 所以需要把父组件对应的watcher保存起来
     pushTarget(this);
     var value;
     var vm = this.vm;
@@ -4519,6 +4538,7 @@
    */
   Watcher.prototype.addDep = function addDep (dep) {
     var id = dep.id;
+  // 一个属性被多次使用有多个dep，只添加一个
     if (!this.newDepIds.has(id)) {
       this.newDepIds.add(id);
       this.newDeps.push(dep);
@@ -4650,6 +4670,7 @@
   }
 
   function initState (vm) {
+    // TODO挂载？到实例上
     vm._watchers = [];
     var opts = vm.$options;
     if (opts.props) { initProps(vm, opts.props); }
@@ -4998,6 +5019,7 @@
         // internal component options needs special treatment.
         initInternalComponent(vm, options);
       } else {
+        // 实例初始化配置对象，包含构造函数上的options（全局配置？），用户传入的options
         vm.$options = mergeOptions(
           resolveConstructorOptions(vm.constructor),
           options || {},
@@ -5052,6 +5074,8 @@
   }
 
   function resolveConstructorOptions (Ctor) {
+    // 构造函数上的options，全局配置？
+    // TODO
     var options = Ctor.options;
     if (Ctor.super) {
       var superOptions = resolveConstructorOptions(Ctor.super);
@@ -11939,6 +11963,7 @@
     el,
     hydrating
   ) {
+    // 拿到el对应的Element
     el = el && query(el);
 
     /* istanbul ignore if */
@@ -11982,6 +12007,7 @@
           mark('compile');
         }
 
+        // 把template转换成render函数
         var ref = compileToFunctions(template, {
           outputSourceRange: "development" !== 'production',
           shouldDecodeNewlines: shouldDecodeNewlines,

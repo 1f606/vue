@@ -49,7 +49,9 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options
+  // 给props增加响应式并注入到实例
   if (opts.props) initProps(vm, opts.props)
+  // 把方法的this指向实例，并注入到实例
   if (opts.methods) initMethods(vm, opts.methods)
   if (opts.data) {
     initData(vm)
@@ -64,6 +66,7 @@ export function initState (vm: Component) {
 
 function initProps (vm: Component, propsOptions: Object) {
   const propsData = vm.$options.propsData || {}
+  // 存放vm实例上没有，但是在props中定义了的属性。存放定义的props。
   const props = vm._props = {}
   // cache prop keys so that future props updates can iterate using Array
   // instead of dynamic object key enumeration.
@@ -103,6 +106,7 @@ function initProps (vm: Component, propsOptions: Object) {
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
     // instantiation here.
+    // 给实例增加props中定义的属性
     if (!(key in vm)) {
       proxy(vm, `_props`, key)
     }
@@ -110,6 +114,7 @@ function initProps (vm: Component, propsOptions: Object) {
   toggleObserving(true)
 }
 
+// 给data增加响应式
 function initData (vm: Component) {
   let data = vm.$options.data
   data = vm._data = typeof data === 'function'
